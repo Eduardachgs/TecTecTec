@@ -40,21 +40,29 @@ TTT.MODOS = {
   zen:           { id: 'zen',           nome: 'ZEN',           temVida: false },
 };
 
-// velocidade: px/s das palavras na onda 1 | aceleracao: +% de velocidade por onda
+// velocidade:      px/s das palavras na onda 1
+// aceleracao:      +% de velocidade por onda
+// ritmo:           multiplica o intervalo entre palavras (menor = mais palavras)
+// velProjetil:     multiplica a velocidade das letras disparadas
+// ondaAtiradores:  a partir de qual onda surgem palavras atiradoras
+// chanceAtirador:  multiplica a chance de uma palavra ser atiradora
 TTT.DIFICULDADES = {
   facil: {
     id: 'facil', nome: 'FÁCIL',
-    velocidade: 24, aceleracao: 0.05, atiradores: false,
+    velocidade: 24, aceleracao: 0.05, ritmo: 1.2,
+    atiradores: false, ondaAtiradores: 99, chanceAtirador: 0, velProjetil: 0.8,
     danoPalavra: 15, danoProjetil: 8, danoErro: 1,
   },
   normal: {
     id: 'normal', nome: 'NORMAL',
-    velocidade: 32, aceleracao: 0.07, atiradores: true,
+    velocidade: 32, aceleracao: 0.07, ritmo: 1,
+    atiradores: true, ondaAtiradores: 2, chanceAtirador: 1, velProjetil: 1,
     danoPalavra: 20, danoProjetil: 10, danoErro: 2,
   },
   dificil: {
     id: 'dificil', nome: 'DIFÍCIL',
-    velocidade: 42, aceleracao: 0.09, atiradores: true,
+    velocidade: 58, aceleracao: 0.12, ritmo: 0.65,
+    atiradores: true, ondaAtiradores: 1, chanceAtirador: 1.5, velProjetil: 1.4,
     danoPalavra: 25, danoProjetil: 15, danoErro: 4,
   },
 };

@@ -82,6 +82,17 @@ TELA DE JOGO                         RESULTADOS
 | Métricas | Pontos, onda, palavras, WPM (5 caracteres = 1 palavra), precisão, maior combo, tempo |
 | Recordes | Salvos no navegador (localStorage) por modo + dificuldade |
 
+## Dificuldades
+
+| | Fácil | Normal | Difícil |
+|---|---|---|---|
+| Velocidade inicial | 24 px/s | 32 px/s | 58 px/s |
+| Aceleração por onda | +5% | +7% | +12% |
+| Intervalo entre palavras | ×1,2 | ×1 | ×0,65 |
+| Palavras atiradoras | não | a partir da onda 2 | desde a onda 1, 1,5× mais frequentes |
+| Velocidade dos projéteis | — | ×1 | ×1,4 |
+| Dano (palavra / projétil / erro) | 15 / 8 / 1 | 20 / 10 / 2 | 25 / 15 / 4 |
+
 ## Bônus (estrutura pronta, sorteio na próxima etapa)
 
 | Bônus | Efeito | Duração |

@@ -215,7 +215,8 @@
     }
 
     _intervaloSpawn() {
-      return Math.max(0.55, 2.4 - this.onda * 0.15) * (0.7 + Math.random() * 0.6);
+      const base = Math.max(0.55, 2.4 - this.onda * 0.15) * this.dif.ritmo;
+      return base * (0.7 + Math.random() * 0.6);
     }
 
     _velocidade() {
@@ -254,8 +255,8 @@
         const dist = Math.min(Infinity, ...vizinhas.map((a) => Math.abs(a.x - cand)));
         if (dist > melhorDist) { x = cand; melhorDist = dist; }
       }
-      const atirador = this.dif.atiradores && this.onda >= 2
-        && Math.random() < Math.min(0.45, 0.12 + this.onda * 0.04);
+      const atirador = this.dif.atiradores && this.onda >= this.dif.ondaAtiradores
+        && Math.random() < Math.min(0.6, (0.12 + this.onda * 0.04) * this.dif.chanceAtirador);
       const alvo = new TTT.Alvo({
         texto,
         x,
@@ -275,7 +276,7 @@
         texto,
         x: origem.x,
         y: origem.y + 16,
-        vel: 70 + this.onda * 6,
+        vel: (70 + this.onda * 6) * this.dif.velProjetil,
         tipo: 'projetil',
       });
       this.ctx.font = `${this.tamPalavra}px ${FONTE}`;
