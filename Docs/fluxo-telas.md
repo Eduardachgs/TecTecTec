@@ -73,6 +73,7 @@ TELA DE JOGO                         RESULTADOS
 | Papel da máquina | Mostra o que já foi digitado da palavra em foco, com cursor; tecla errada pisca em vermelho |
 | Apagar | Backspace apaga a última letra; Ctrl+Backspace apaga tudo. Sem letras digitadas, o alvo é liberado para mirar em outro |
 | Celular/tablet | Teclado virtual abre ao iniciar a partida, ao tocar no jogo ou no botão TECLADO; botão PAUSA substitui o Esc; fonte das palavras cresce em telas pequenas |
+| Recuo | Cada letra acertada empurra a palavra para trás, mas nunca para fora da tela |
 | Ondas | `4 + 2×onda` palavras por onda; palavras mais longas e rápidas a cada onda |
 | Atiradores | A partir da onda 2 (Normal/Difícil): palavras rosa disparam letras vermelhas |
 | Sobrevivência | Perde vida ao errar tecla, ao ser atingido por palavra ou por projétil |

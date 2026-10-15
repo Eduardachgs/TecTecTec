@@ -20,6 +20,7 @@
       this.morrendo = false;     // completo, esperando o último tiro chegar
       this.recuo = 0;
       this.tempoTiro = 1.5 + Math.random() * 2;
+      this.meiaLargura = 0;      // metade da largura do texto (o jogo mede ao criar)
     }
 
     get proximaLetra() { return this.texto[this.digitado]; }
@@ -32,14 +33,27 @@
     // cada letra acertada empurra o alvo um pouco para trás (feedback)
     empurrar() { this.recuo = Math.min(this.recuo + 30, 90); }
 
-    atualizar(dt, destinoX, destinoY) {
+    // area = { largura, margem, topo }: limites da tela que o recuo não pode ultrapassar
+    atualizar(dt, destinoX, destinoY, area) {
       if (this.morrendo) return;
       const dx = destinoX - this.x;
       const dy = destinoY - this.y;
       const dist = Math.hypot(dx, dy) || 1;
       const v = this.vel - this.recuo * 3;
-      this.x += (dx / dist) * v * dt;
-      this.y += (dy / dist) * v * dt;
+      let x = this.x + (dx / dist) * v * dt;
+      let y = this.y + (dy / dist) * v * dt;
+
+      // Andando para trás (recuo), a palavra não sai da tela. Se ela ainda está
+      // entrando (parte fora), o recuo só não a empurra mais para fora.
+      if (v < 0 && area) {
+        const xMin = area.margem + this.meiaLargura;
+        const xMax = area.largura - area.margem - this.meiaLargura;
+        x = Math.min(Math.max(x, Math.min(this.x, xMin)), Math.max(this.x, xMax));
+        y = Math.max(y, Math.min(this.y, area.topo));
+      }
+
+      this.x = x;
+      this.y = y;
       this.recuo = Math.max(0, this.recuo - 120 * dt);
     }
   }

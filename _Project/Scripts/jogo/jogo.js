@@ -61,6 +61,8 @@
       const escalaTela = (this.canvas.clientWidth || LARGURA) / LARGURA;
       this.tamPalavra = Math.round(Math.min(TAMANHO_PALAVRA_MAX,
         Math.max(TAMANHO_PALAVRA_MIN, TAMANHO_NA_TELA / escalaTela)));
+      // limites que o recuo das palavras respeita (a caixa da palavra inteira fica visível)
+      this.area = { largura: LARGURA, margem: 8, topo: Math.round(this.tamPalavra / 2) + 7 };
 
       this.estado = 'contagem';
       this.contagem = 3;
@@ -254,26 +256,31 @@
       }
       const atirador = this.dif.atiradores && this.onda >= 2
         && Math.random() < Math.min(0.45, 0.12 + this.onda * 0.04);
-      this.alvos.push(new TTT.Alvo({
+      const alvo = new TTT.Alvo({
         texto,
         x,
         y: -16,
         vel: this._velocidade() * (0.85 + Math.random() * 0.3),
         atirador,
-      }));
+      });
+      alvo.meiaLargura = meia;
+      this.alvos.push(alvo);
     }
 
     _dispararProjetil(origem) {
       const tamanho = this.onda >= 5 && Math.random() < 0.4 ? 2 : 1;
       let texto = '';
       for (let i = 0; i < tamanho; i++) texto += TTT.Texto.sortear(TTT.LETRAS_PROJETIL);
-      this.alvos.push(new TTT.Alvo({
+      const projetil = new TTT.Alvo({
         texto,
         x: origem.x,
         y: origem.y + 16,
         vel: 70 + this.onda * 6,
         tipo: 'projetil',
-      }));
+      });
+      this.ctx.font = `${this.tamPalavra}px ${FONTE}`;
+      projetil.meiaLargura = this.ctx.measureText(texto).width / 2;
+      this.alvos.push(projetil);
       TTT.Audio.disparo();
     }
 
@@ -366,7 +373,7 @@
 
       for (const a of this.alvos) {
         if (!a.vivo) continue;
-        a.atualizar(dt, JOGADOR.x, JOGADOR.y);
+        a.atualizar(dt, JOGADOR.x, JOGADOR.y, this.area);
         if (a.morrendo) continue;
 
         if (a.atirador) {
