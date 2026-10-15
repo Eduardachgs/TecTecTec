@@ -1,0 +1,15 @@
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Dependências (caso alguma ferramenta seja adicionada no futuro)
+node_modules/
+
+# Arquivos temporários do Office
+~$*

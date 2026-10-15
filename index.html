@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TecTecTec — O Macaco Infinito</title>
+  <link rel="stylesheet" href="_Project/UI/style.css">
+</head>
+<body>
+  <main id="app">
+
+    <!-- ================= MENU INICIAL ================= -->
+    <section id="tela-menu" class="tela">
+      <h1 class="titulo">TEC<span>TEC</span>TEC</h1>
+      <p class="subtitulo">O TEOREMA DO MACACO INFINITO</p>
+      <canvas id="menu-macaco" class="pixel" width="240" height="170"></canvas>
+      <nav class="menu">
+        <button class="btn" data-ir="modo">JOGAR</button>
+        <button class="btn" data-ir="como-jogar">COMO JOGAR</button>
+        <button class="btn" data-ir="opcoes">OPÇÕES</button>
+        <button class="btn" disabled>TEXTOS PRÓPRIOS<small>EM BREVE</small></button>
+      </nav>
+      <p class="rodape">RECORDE <b id="menu-recorde">0</b></p>
+    </section>
+
+    <!-- ================= ESCOLHA DE MODO ================= -->
+    <section id="tela-modo" class="tela" data-voltar="menu">
+      <h2>ESCOLHA O MODO</h2>
+      <nav class="menu">
+        <button class="btn" data-ir="dificuldade">SOBREVIVÊNCIA<small>BARRA DE VIDA. NÃO DEIXE AS PALAVRAS CHEGAREM.</small></button>
+        <button class="btn" data-acao="jogar" data-modo="zen">ZEN<small>INFINITO E SEM VIDA. SÓ DIGITE.</small></button>
+        <button class="btn btn-sec" data-ir="menu">VOLTAR</button>
+      </nav>
+    </section>
+
+    <!-- ================= DIFICULDADE ================= -->
+    <section id="tela-dificuldade" class="tela" data-voltar="modo">
+      <h2>SOBREVIVÊNCIA</h2>
+      <p class="subtitulo">ESCOLHA A DIFICULDADE</p>
+      <nav class="menu">
+        <button class="btn" data-acao="jogar" data-modo="sobrevivencia" data-dif="facil">FÁCIL<small>PALAVRAS LENTAS, SEM PROJÉTEIS</small></button>
+        <button class="btn" data-acao="jogar" data-modo="sobrevivencia" data-dif="normal">NORMAL<small>INIMIGOS ATIRAM LETRAS</small></button>
+        <button class="btn" data-acao="jogar" data-modo="sobrevivencia" data-dif="dificil">DIFÍCIL<small>RÁPIDO E SEM PERDÃO</small></button>
+        <button class="btn btn-sec" data-ir="modo">VOLTAR</button>
+      </nav>
+    </section>
+
+    <!-- ================= COMO JOGAR ================= -->
+    <section id="tela-como-jogar" class="tela" data-voltar="menu">
+      <h2>COMO JOGAR</h2>
+      <ul class="lista">
+        <li>DIGITE AS PALAVRAS QUE DESCEM ANTES QUE ELAS ALCANCEM O MACACO.</li>
+        <li>A PRIMEIRA LETRA ESCOLHE O ALVO. TERMINE A PALAVRA PARA DESTRUÍ-LA.</li>
+        <li>O QUE VOCÊ DIGITA APARECE NO PAPEL DA MÁQUINA. BACKSPACE APAGA UMA LETRA; CTRL+BACKSPACE SOLTA A PALAVRA PARA MIRAR EM OUTRA.</li>
+        <li><span class="c-rosa">PALAVRAS ROSA</span> ATIRAM <span class="c-vermelho">LETRAS VERMELHAS</span>. DIGITE-AS PARA SE DEFENDER!</li>
+        <li>ERRAR ZERA O COMBO. NA SOBREVIVÊNCIA, TAMBÉM TIRA VIDA.</li>
+        <li>BÔNUS: <span class="c-verde">AUTO-COMPLETAR (TAB)</span>, <span class="c-azul">ESCUDO</span> E <span class="c-amarelo">SEM ACENTOS</span>.</li>
+        <li>ESC PAUSA A PARTIDA.</li>
+      </ul>
+      <nav class="menu">
+        <button class="btn btn-sec" data-ir="menu">VOLTAR</button>
+      </nav>
+    </section>
+
+    <!-- ================= OPÇÕES ================= -->
+    <section id="tela-opcoes" class="tela" data-voltar="menu">
+      <h2>OPÇÕES</h2>
+      <nav class="menu">
+        <button class="btn" data-acao="alternar-som" id="btn-som">SOM: LIGADO</button>
+        <button class="btn" data-acao="apagar-recordes">APAGAR RECORDES</button>
+        <button class="btn btn-sec" data-ir="menu">VOLTAR</button>
+      </nav>
+    </section>
+
+    <!-- ================= JOGO ================= -->
+    <section id="tela-jogo" class="tela">
+      <header class="hud">
+        <span id="hud-modo">ZEN</span>
+        <span>PONTOS <b id="hud-pontos">0</b></span>
+        <span>ONDA <b id="hud-onda">1</b></span>
+        <span>COMBO <b id="hud-combo">0</b></span>
+        <span>WPM <b id="hud-wpm">0</b></span>
+        <span id="hud-vida-box">VIDA <span class="barra"><span id="hud-vida"></span></span></span>
+        <span class="hud-botoes">
+          <button class="btn btn-mini" data-acao="teclado" id="btn-teclado" hidden>TECLADO</button>
+          <button class="btn btn-mini" data-acao="pausar">PAUSA</button>
+        </span>
+      </header>
+      <div class="palco" id="palco">
+        <canvas id="jogo" class="pixel" width="960" height="540"></canvas>
+        <!-- Campo invisível: no celular, focar nele abre o teclado virtual -->
+        <input id="entrada-mobile" type="text" aria-label="Digitação"
+               autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+               inputmode="text" enterkeyhint="done">
+        <div id="overlay-pausa" class="overlay" hidden>
+          <h2>PAUSA</h2>
+          <nav class="menu">
+            <button class="btn" data-acao="continuar">CONTINUAR</button>
+            <button class="btn" data-acao="encerrar">ENCERRAR PARTIDA</button>
+            <button class="btn btn-sec" data-acao="sair-menu">MENU PRINCIPAL</button>
+          </nav>
+        </div>
+      </div>
+      <footer class="dicas">
+        <span id="hud-bonus"></span>
+        <span>BACKSPACE: APAGAR · ESC: PAUSA</span>
+      </footer>
+    </section>
+
+    <!-- ================= RESULTADOS ================= -->
+    <section id="tela-resultados" class="tela" data-voltar="menu">
+      <h2 id="res-titulo">FIM DE JOGO</h2>
+      <p id="res-sub" class="subtitulo"></p>
+      <p id="res-recorde" class="novo-recorde" hidden>NOVO RECORDE!</p>
+      <dl class="stats">
+        <div><dt>PONTOS</dt><dd id="res-pontos">0</dd></div>
+        <div><dt>ONDA</dt><dd id="res-onda">0</dd></div>
+        <div><dt>PALAVRAS</dt><dd id="res-palavras">0</dd></div>
+        <div><dt>WPM</dt><dd id="res-wpm">0</dd></div>
+        <div><dt>PRECISÃO</dt><dd id="res-precisao">0%</dd></div>
+        <div><dt>MAIOR COMBO</dt><dd id="res-combo">0</dd></div>
+        <div><dt>TEMPO</dt><dd id="res-tempo">0:00</dd></div>
+        <div><dt>RECORDE</dt><dd id="res-melhor">0</dd></div>
+      </dl>
+      <div class="manuscrito">
+        <h3>O MANUSCRITO DO MACACO</h3>
+        <p id="res-texto"></p>
+        <p id="res-chance" class="chance"></p>
+      </div>
+      <nav class="menu menu-linha">
+        <button class="btn" data-acao="jogar-novamente">JOGAR DE NOVO</button>
+        <button class="btn btn-sec" data-ir="menu">MENU</button>
+      </nav>
+    </section>
+
+  </main>
+
+  <!-- Ordem importa: scripts clássicos compartilham o namespace global TTT -->
+  <!-- Dados e configurações -->
+  <script src="_Project/ScriptableObjects/config.js"></script>
+  <script src="_Project/ScriptableObjects/palavras.js"></script>
+  <script src="_Project/ScriptableObjects/bonus.js"></script>
+  <!-- Núcleo (serviços genéricos) -->
+  <script src="_Project/Scripts/nucleo/armazenamento.js"></script>
+  <script src="_Project/Scripts/nucleo/texto.js"></script>
+  <script src="_Project/Scripts/nucleo/audio.js"></script>
+  <script src="_Project/Scripts/nucleo/telas.js"></script>
+  <!-- Assets (sprites e sons) -->
+  <script src="_Project/Sprites/macaco.js"></script>
+  <script src="_Project/Audio/efeitos.js"></script>
+  <!-- Jogo -->
+  <script src="_Project/Prefabs/entidades.js"></script>
+  <script src="_Project/Scripts/jogo/sprites.js"></script>
+  <script src="_Project/Scripts/jogo/bonus.js"></script>
+  <script src="_Project/Scripts/jogo/jogo.js"></script>
+  <!-- Interface e inicialização -->
+  <script src="_Project/Scripts/ui/menu-macaco.js"></script>
+  <script src="_Project/Scripts/main.js"></script>
+</body>
+</html>
