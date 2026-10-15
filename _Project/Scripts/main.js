@@ -7,6 +7,32 @@
   let ultimaPartida = { modo: 'sobrevivencia', dif: 'normal' };
   let bloqueioTeclado = 0; // evita "Enter/Espaço" acidental ao cair nos resultados
 
+  // ---------------- layout do teclado (ABNT2 / US) ----------------
+  // Preferência salva; sem ela, pt-* começa em ABNT2 e o resto em US.
+  const tecladoSalvo = TTT.Armazenamento.ler('teclado', null);
+  let teclado = TTT.TECLADOS[tecladoSalvo]
+    ? tecladoSalvo
+    : (navigator.language || '').toLowerCase().startsWith('pt') ? 'abnt2' : 'us';
+
+  // No Chrome dá para perguntar ao navegador qual tecla fica à direita do L:
+  // "ç" = ABNT2. Só vale enquanto o jogador não escolheu manualmente.
+  if (!tecladoSalvo && navigator.keyboard?.getLayoutMap) {
+    navigator.keyboard.getLayoutMap()
+      .then((mapa) => {
+        if (TTT.Armazenamento.ler('teclado', null)) return;
+        teclado = mapa.get('Semicolon') === 'ç' ? 'abnt2' : 'us';
+        atualizarBotoesTeclado();
+      })
+      .catch(() => { /* bloqueado (iframe, permissão): fica a suposição pelo idioma */ });
+  }
+
+  function atualizarBotoesTeclado() {
+    const t = TTT.TECLADOS[teclado];
+    for (const btn of document.querySelectorAll('.js-teclado')) {
+      btn.innerHTML = `TECLADO: ${t.nome}<small>${t.descricao}</small>`;
+    }
+  }
+
   const jogo = new TTT.Jogo($('jogo'), {
     aoAtualizarHud: atualizarHud,
     aoFim: (resultado) => TTT.Telas.ir('resultados', resultado),
@@ -131,6 +157,12 @@
       TTT.Audio.ligado = !TTT.Audio.ligado;
       atualizarOpcoes();
     },
+    'alternar-teclado'() {
+      const ids = Object.keys(TTT.TECLADOS);
+      teclado = ids[(ids.indexOf(teclado) + 1) % ids.length];
+      TTT.Armazenamento.gravar('teclado', teclado);
+      atualizarBotoesTeclado();
+    },
     'apagar-recordes'(btn) {
       TTT.Armazenamento.apagarRecordes();
       btn.textContent = 'RECORDES APAGADOS';
@@ -174,7 +206,7 @@
       $('hud-modo').textContent = modo.temVida ? `${modo.nome} · ${dif.nome}` : modo.nome;
       $('hud-vida-box').hidden = !modo.temVida;
       $('overlay-pausa').hidden = true;
-      jogo.iniciar(partida.modo, partida.dif);
+      jogo.iniciar(partida.modo, partida.dif, teclado);
       abrirTeclado(); // ainda dentro do clique em "JOGAR": o celular permite abrir o teclado
     },
     aoSair() { jogo.parar(); },
@@ -193,7 +225,8 @@
     const { recorde, novo } = TTT.Armazenamento.registrarPontuacao(r.modo, r.dificuldade, r.pontos);
 
     $('res-titulo').textContent = r.motivo === 'derrota' ? 'FIM DE JOGO' : 'PARTIDA ENCERRADA';
-    $('res-sub').textContent = r.modo === 'zen' ? r.modoNome : `${r.modoNome} · ${r.dificuldadeNome}`;
+    const partes = r.modo === 'zen' ? [r.modoNome] : [r.modoNome, r.dificuldadeNome];
+    $('res-sub').textContent = [...partes, `TECLADO ${r.tecladoNome}`].join(' · ');
     $('res-recorde').hidden = !novo;
     $('res-pontos').textContent = r.pontos;
     $('res-onda').textContent = r.onda;
@@ -284,5 +317,6 @@
   });
 
   // ---------------- início ----------------
+  atualizarBotoesTeclado();
   TTT.Telas.ir('menu');
 })();

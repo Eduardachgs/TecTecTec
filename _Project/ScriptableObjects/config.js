@@ -66,3 +66,10 @@ TTT.DIFICULDADES = {
     danoPalavra: 25, danoProjetil: 15, danoErro: 4,
   },
 };
+
+// Layout do teclado do jogador. Sem acentos, as palavras chegam já sem
+// acento e sem cedilha ("coração" vira "coracao").
+TTT.TECLADOS = {
+  abnt2: { id: 'abnt2', nome: 'ABNT2', descricao: 'COM ACENTOS E Ç', acentos: true },
+  us:    { id: 'us',    nome: 'US',    descricao: 'SEM ACENTOS NEM Ç', acentos: false },
+};

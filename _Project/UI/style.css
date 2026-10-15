@@ -141,6 +141,8 @@ h3 { font-size: 10px; font-weight: normal; }
   color: var(--cinza);
 }
 .btn-sec { background: var(--cinza-escuro); }
+/* botão de configuração dentro de uma lista de escolhas (ex.: layout do teclado) */
+.btn-opcao { background: var(--fundo); outline: 2px dashed var(--azul); outline-offset: -6px; }
 
 .btn:hover:not([disabled]),
 .btn:focus { outline: none; background: var(--roxo); color: var(--amarelo); }

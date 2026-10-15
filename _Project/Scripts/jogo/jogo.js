@@ -35,9 +35,10 @@
     }
 
     // ---------------- ciclo de vida ----------------
-    iniciar(modoId, difId) {
+    iniciar(modoId, difId, tecladoId) {
       this.modo = TTT.MODOS[modoId];
       this.dif = TTT.DIFICULDADES[difId] || TTT.DIFICULDADES.normal;
+      this.teclado = TTT.TECLADOS[tecladoId] || TTT.TECLADOS.abnt2;
 
       this.alvos = [];
       this.tiros = [];
@@ -239,7 +240,8 @@
       for (let i = 0; i < 12 && iniciais.has(TTT.Texto.normalizar(palavra[0])); i++) {
         palavra = TTT.Texto.sortear(lista);
       }
-      return palavra;
+      // teclado sem acentos (US): "coração" -> "coracao"
+      return this.teclado.acentos ? palavra : TTT.Texto.normalizar(palavra);
     }
 
     _criarPalavra() {
@@ -545,6 +547,7 @@
         modoNome: this.modo.nome,
         dificuldade: this.dif.id,
         dificuldadeNome: this.dif.nome,
+        tecladoNome: this.teclado.nome,
         pontos: s.pontos,
         onda: Math.max(1, this.onda),
         palavras: s.palavras,
