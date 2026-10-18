@@ -128,6 +128,14 @@
       TTT.Audio.apagar();
     }
 
+    // Shift: desfoca a palavra atual sem apagar o progresso; dá para mirar em outra.
+    desfocar() {
+      if (this.estado !== 'jogando' || !this.alvo) return false;
+      this.alvo = null;
+      TTT.Audio.apagar();
+      return true;
+    }
+
     // O que aparece no papel da máquina: o trecho já digitado da palavra em foco
     _textoPapel() {
       const alvo = this.alvo && this.alvo.vivo ? this.alvo : null;
@@ -150,13 +158,15 @@
       return esperado === digitado;
     }
 
-    // Prioridade: projéteis (perigo imediato) e depois quem está mais perto
+    // Prioridade: projéteis (perigo imediato) e depois quem está mais perto.
+    // Palavras já pela metade (desfocadas com Shift) são retomadas pela próxima letra.
     _escolherAlvo(ch) {
       let melhor = null;
       let melhorPrioridade = -Infinity;
       for (const a of this.alvos) {
-        if (!a.vivo || a.morrendo || a.digitado > 0) continue;
-        if (!this._confere(a.texto[0], ch)) continue;
+        if (!a.vivo || a.morrendo) continue;
+        const esperada = a.digitado > 0 ? a.proximaLetra : a.texto[0];
+        if (!this._confere(esperada, ch)) continue;
         const prioridade = (a.tipo === 'projetil' ? 10000 : 0) + a.y;
         if (prioridade > melhorPrioridade) {
           melhor = a;

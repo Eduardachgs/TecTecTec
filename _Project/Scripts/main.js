@@ -267,6 +267,7 @@
     if (TTT.Telas.atual === 'jogo' && !jogo.pausado) {
       if (e.key === 'Escape') { e.preventDefault(); pausar(); return; }
       if (e.key === 'Tab') { e.preventDefault(); jogo.autocompletar(); return; }
+      if (e.key === 'Shift') { jogo.desfocar(); return; } // troca de alvo mantendo o progresso
       // com o campo do teclado virtual focado, letras e Backspace chegam pelo evento "input"
       if (e.target === entrada) return;
       if (e.key === 'Backspace') { e.preventDefault(); jogo.apagar(e.ctrlKey || e.altKey || e.metaKey); return; }
