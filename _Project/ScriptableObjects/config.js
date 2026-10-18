@@ -49,14 +49,14 @@ TTT.MODOS = {
 TTT.DIFICULDADES = {
   facil: {
     id: 'facil', nome: 'FÁCIL',
-    velocidade: 24, aceleracao: 0.05, ritmo: 1.2,
+    velocidade: 32, aceleracao: 0.07, ritmo: 0.95,
     atiradores: false, ondaAtiradores: 99, chanceAtirador: 0, velProjetil: 0.8,
     danoPalavra: 15, danoProjetil: 8, danoErro: 1,
   },
   normal: {
     id: 'normal', nome: 'NORMAL',
-    velocidade: 32, aceleracao: 0.07, ritmo: 1,
-    atiradores: true, ondaAtiradores: 2, chanceAtirador: 1, velProjetil: 1,
+    velocidade: 44, aceleracao: 0.09, ritmo: 0.80,
+    atiradores: true, ondaAtiradores: 3, chanceAtirador: 1, velProjetil: 1,
     danoPalavra: 20, danoProjetil: 10, danoErro: 2,
   },
   dificil: {
