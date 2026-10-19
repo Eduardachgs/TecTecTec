@@ -35,6 +35,9 @@ TTT.CORES = {
 
 TTT.VIDA_MAXIMA = 100;
 
+// Cura fixa paga pelo bônus de VIDA (palavra especial verde), em qualquer momento
+TTT.CURA_VIDA = 25;
+
 TTT.MODOS = {
   sobrevivencia: { id: 'sobrevivencia', nome: 'SOBREVIVÊNCIA', temVida: true },
   zen:           { id: 'zen',           nome: 'ZEN',           temVida: false },
@@ -46,23 +49,27 @@ TTT.MODOS = {
 // velProjetil:     multiplica a velocidade das letras disparadas
 // ondaAtiradores:  a partir de qual onda surgem palavras atiradoras
 // chanceAtirador:  multiplica a chance de uma palavra ser atiradora
+// chanceBonus:     chance de uma palavra ser especial (verde: paga bônus)
 TTT.DIFICULDADES = {
   facil: {
     id: 'facil', nome: 'FÁCIL',
-    velocidade: 32, aceleracao: 0.07, ritmo: 0.95,
+    velocidade: 32, aceleracao: 0.07, ritmo: 1.2,
     atiradores: false, ondaAtiradores: 99, chanceAtirador: 0, velProjetil: 0.8,
+    chanceBonus: 0.10,
     danoPalavra: 15, danoProjetil: 8, danoErro: 1,
   },
   normal: {
     id: 'normal', nome: 'NORMAL',
-    velocidade: 44, aceleracao: 0.09, ritmo: 0.80,
-    atiradores: true, ondaAtiradores: 3, chanceAtirador: 1, velProjetil: 1,
+    velocidade: 44, aceleracao: 0.09, ritmo: 1,
+    atiradores: true, ondaAtiradores: 2, chanceAtirador: 1, velProjetil: 1,
+    chanceBonus: 0.08,
     danoPalavra: 20, danoProjetil: 10, danoErro: 2,
   },
   dificil: {
     id: 'dificil', nome: 'DIFÍCIL',
     velocidade: 58, aceleracao: 0.12, ritmo: 0.65,
     atiradores: true, ondaAtiradores: 1, chanceAtirador: 1.5, velProjetil: 1.4,
+    chanceBonus: 0.06,
     danoPalavra: 25, danoProjetil: 15, danoErro: 4,
   },
 };
