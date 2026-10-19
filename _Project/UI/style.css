@@ -174,8 +174,12 @@ h3 { font-size: 10px; font-weight: normal; }
 .c-rosa { color: var(--rosa); }
 .c-vermelho { color: var(--vermelho); }
 .c-verde { color: var(--verde); }
+.c-laranja { color: var(--laranja); }
 .c-azul { color: var(--azul-claro); }
 .c-amarelo { color: var(--amarelo); }
+.c-cinza { color: var(--cinza); }
+.c-marrom { color: var(--marrom); }
+.c-pele { color: var(--pele); }
 
 /* ---------------- Jogo ---------------- */
 #tela-jogo { gap: 8px; }
@@ -255,10 +259,27 @@ h3 { font-size: 10px; font-weight: normal; }
   width: 100%;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   color: var(--cinza-escuro);
   font-size: 8px;
 }
-#hud-bonus { color: var(--verde); }
+
+/* chips de bônus: mais visíveis que o rodapé de dicas */
+#hud-bonus {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.bonus-chip {
+  font-size: 11px;
+  padding: 5px 9px 4px;
+  background: var(--azul);
+  box-shadow: 0 0 0 var(--px) var(--preto);
+  white-space: nowrap;
+}
+.bonus-chip.autocompletar { color: var(--rosa); }
+.bonus-chip.escudo { color: var(--azul-claro); }
 
 /* ---------------- Resultados ---------------- */
 #tela-resultados { gap: 14px; }
@@ -297,7 +318,7 @@ h3 { font-size: 10px; font-weight: normal; }
    Na partida, o jogo sobe para o topo: a metade de baixo fica para o teclado virtual. */
 @media (pointer: coarse) {
   body:has(#tela-jogo.ativa) { align-items: flex-start; }
-  .dicas span:last-child { display: none; }
+  .dicas > span:last-child { display: none; }
 }
 
 /* ---------------- Telas pequenas ---------------- */

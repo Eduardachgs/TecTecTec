@@ -50,12 +50,13 @@
       this.timerSpawn = 0;
       this.stats = { pontos: 0, acertos: 0, erros: 0, palavras: 0, perdidas: 0, combo: 0, maiorCombo: 0, tempo: 0 };
       this.manuscrito = [];
-      this.flags = { ignorarAcentos: false, autocompletar: false, escudo: false };
-      this.bonusAtivos = [];
+      this.usosTab = 0;      // usos do AUTO-COMPLETAR (pagos pela palavra especial laranja)
+      this.usosEscudo = 0;   // usos do ESCUDO (pagos pela palavra especial azul)
       this.tremor = 0;
       this.flashErro = 0;
       this.erroPapel = null;
       this.aviso = null;
+      this.avisoBonus = null;
       this.bracoFase = 0;
 
       // Em tela pequena (celular) o canvas encolhe; aumentamos a fonte para continuar legível
@@ -128,35 +129,69 @@
       TTT.Audio.apagar();
     }
 
+    // Shift: desfoca a palavra atual sem apagar o progresso; dá para mirar em outra.
+    desfocar() {
+      if (this.estado !== 'jogando' || !this.alvo) return false;
+      this.alvo = null;
+      TTT.Audio.apagar();
+      return true;
+    }
+
     // O que aparece no papel da máquina: o trecho já digitado da palavra em foco
     _textoPapel() {
       const alvo = this.alvo && this.alvo.vivo ? this.alvo : null;
       return alvo ? alvo.texto.slice(0, alvo.digitado) : '';
     }
 
-    // Bônus "auto-completar": TAB termina a palavra em foco
+    // Bônus "auto-completar": TAB (com usos acumulados) termina a palavra em foco.
+    // Exige pelo menos 2 letras já digitadas.
     autocompletar() {
-      if (this.estado !== 'jogando' || !this.flags.autocompletar) return false;
+      if (this.estado !== 'jogando' || this.usosTab <= 0) return false;
       const alvo = this.alvo;
-      if (!alvo || !alvo.vivo || alvo.morrendo) return false;
+      if (!alvo || !alvo.vivo || alvo.morrendo || alvo.digitado < 2) return false;
+      this.usosTab--;
       while (!alvo.completo) this._acertar(alvo);
       return true;
     }
 
-    _confere(esperado, digitado) {
-      if (this.flags.ignorarAcentos) {
-        return TTT.Texto.normalizar(esperado) === TTT.Texto.normalizar(digitado);
+    // Espaço (com usos do bônus ESCUDO): onda que empurra as palavras
+    // próximas do jogador para longe, evitando o dano imediato.
+    usarEscudo() {
+      if (this.estado !== 'jogando' || this.usosEscudo <= 0) return false;
+      this.usosEscudo--;
+      TTT.Audio.escudo();
+      this._explodir(JOGADOR.x, JOGADOR.y, CORES.azulClaro, 26);
+
+      const raio = 240;    // só empurra quem está perto
+      const empurrao = 110;
+      for (const a of this.alvos) {
+        if (!a.vivo || a.morrendo) continue;
+        const dx = a.x - JOGADOR.x;
+        const dy = a.y - JOGADOR.y;
+        if (Math.hypot(dx, dy) > raio) continue;
+        const d = Math.hypot(dx, dy) || 1;
+        // desloca radialmente para longe e continua afastando via recuo
+        a.x = Math.min(Math.max(a.x + (dx / d) * empurrao, this.area.margem + a.meiaLargura),
+          LARGURA - this.area.margem - a.meiaLargura);
+        a.y = Math.min(Math.max(a.y + (dy / d) * empurrao, this.area.topo), BASE - 10);
+        a.recuo = 90; // recuo máximo, decai sozinho (ver Alvo.empurrar)
       }
+      return true;
+    }
+
+    _confere(esperado, digitado) {
       return esperado === digitado;
     }
 
-    // Prioridade: projéteis (perigo imediato) e depois quem está mais perto
+    // Prioridade: projéteis (perigo imediato) e depois quem está mais perto.
+    // Palavras já pela metade (desfocadas com Shift) são retomadas pela próxima letra.
     _escolherAlvo(ch) {
       let melhor = null;
       let melhorPrioridade = -Infinity;
       for (const a of this.alvos) {
-        if (!a.vivo || a.morrendo || a.digitado > 0) continue;
-        if (!this._confere(a.texto[0], ch)) continue;
+        if (!a.vivo || a.morrendo) continue;
+        const esperada = a.digitado > 0 ? a.proximaLetra : a.texto[0];
+        if (!this._confere(esperada, ch)) continue;
         const prioridade = (a.tipo === 'projetil' ? 10000 : 0) + a.y;
         if (prioridade > melhorPrioridade) {
           melhor = a;
@@ -190,10 +225,16 @@
       if (alvo.tipo === 'palavra') {
         s.palavras++;
         this.manuscrito.push(alvo.texto);
+        if (alvo.bonus) TTT.Bonus.ativar(this, alvo.bonus); // paga o bônus da palavra especial
       }
     }
 
     _errar(ch) {
+      // errou com a palavra especial em foco: o bônus dela se perde (vira palavra comum)
+      if (this.alvo && this.alvo.bonus) {
+        this.alvo.bonus = null;
+        this.avisoBonus = { texto: 'BÔNUS PERDIDO', tempo: 1.2, cor: CORES.vermelho };
+      }
       this.erroPapel = { ch, tempo: 0.3 };
       this.stats.erros++;
       this.stats.combo = 0;
@@ -259,12 +300,24 @@
       }
       const atirador = this.dif.atiradores && this.onda >= this.dif.ondaAtiradores
         && Math.random() < Math.min(0.6, (0.12 + this.onda * 0.04) * this.dif.chanceAtirador);
+      // palavra especial: paga um bônus se o jogador completá-la sem erros.
+      // Só uma por vez na tela, nunca atiradora junto, e o tipo bônus é sorteado.
+      // Bônus que curam vida não fazem sentido no modo zen (não há vida)
+      const tiposBonus = Object.keys(TTT.BONUS).filter((id) => {
+        const def = TTT.BONUS[id];
+        return (def.usos || def.instantaneo) && (this.modo.temVida || !def.cura);
+      });
+      const podeEspecial = !this.alvos.some((a) => a.vivo && !a.morrendo && a.bonus);
+      const bonus = podeEspecial && tiposBonus.length && Math.random() < this.dif.chanceBonus
+        ? tiposBonus[Math.floor(Math.random() * tiposBonus.length)]
+        : null;
       const alvo = new TTT.Alvo({
         texto,
         x,
         y: -16,
         vel: this._velocidade() * (0.85 + Math.random() * 0.3),
-        atirador,
+        atirador: !bonus && atirador,
+        bonus,
       });
       alvo.meiaLargura = meia;
       this.alvos.push(alvo);
@@ -294,10 +347,6 @@
       this.stats.combo = 0;
       this._explodir(alvo.x, alvo.y, CORES.vermelho, 14);
 
-      if (alvo.tipo === 'projetil' && this.flags.escudo) {
-        TTT.Audio.escudo();
-        return;
-      }
       this.stats.perdidas++;
       this.tremor = 0.3;
       TTT.Audio.dano();
@@ -343,6 +392,7 @@
       this.tremor = Math.max(0, this.tremor - dt);
       this.flashErro = Math.max(0, this.flashErro - dt);
       if (this.aviso && (this.aviso.tempo -= dt) <= 0) this.aviso = null;
+      if (this.avisoBonus && (this.avisoBonus.tempo -= dt) <= 0) this.avisoBonus = null;
       if (this.erroPapel && (this.erroPapel.tempo -= dt) <= 0) this.erroPapel = null;
 
       if (this.estado === 'contagem') {
@@ -402,8 +452,6 @@
       }
       this.tiros = this.tiros.filter((tiro) => tiro.vivo);
       this.alvos = this.alvos.filter((a) => a.vivo);
-
-      TTT.Bonus.atualizar(this, dt);
     }
 
     // ---------------- render ----------------
@@ -443,14 +491,21 @@
         });
       }
 
-      if (this.flags.escudo) {
-        c.strokeStyle = CORES.azulClaro;
-        c.lineWidth = 4;
-        c.setLineDash([8, 6]);
-        c.beginPath();
-        c.arc(JOGADOR.x, JOGADOR.y + 30, 80, Math.PI, Math.PI * 2);
-        c.stroke();
-        c.setLineDash([]);
+      // aviso de bônus: pill pequena logo abaixo do macaco
+      if (this.avisoBonus && this.estado !== 'derrota' && this.estado !== 'fim') {
+        const b = this.avisoBonus;
+        c.font = `${16}px ${FONTE}`;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        const metade = c.measureText(b.texto).width / 2;
+        const y = BASE - 54;
+        c.fillStyle = 'rgba(15, 15, 27, 0.92)';
+        c.fillRect(LARGURA / 2 - metade - 12, y - 14, metade * 2 + 24, 28);
+        c.strokeStyle = b.cor;
+        c.lineWidth = 2;
+        c.strokeRect(LARGURA / 2 - metade - 11, y - 13, metade * 2 + 22, 26);
+        c.fillStyle = b.cor;
+        c.fillText(b.texto, LARGURA / 2, y);
       }
 
       for (const p of this.particulas) {
@@ -528,7 +583,7 @@
         combo: s.combo,
         wpm: this._wpm(),
         vida: Math.max(0, this.vida),
-        bonus: TTT.Bonus.descrever(this),
+        bonusChips: TTT.Bonus.chips(this),
       };
     }
 

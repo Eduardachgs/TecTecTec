@@ -53,7 +53,16 @@
     definir('hud-onda', h.onda);
     definir('hud-combo', h.combo);
     definir('hud-wpm', h.wpm);
-    definir('hud-bonus', h.bonus);
+
+    // chips de bônus (usos ativos), Rechaveado só quando muda
+    const chaveChips = JSON.stringify(h.bonusChips);
+    if (cacheHud.chips !== chaveChips) {
+      cacheHud.chips = chaveChips;
+      $('hud-bonus').innerHTML = h.bonusChips
+        .map((c) => `<span class="bonus-chip ${c.id}">${c.texto}</span>`)
+        .join('');
+    }
+
     const pct = (h.vida / TTT.VIDA_MAXIMA) * 100;
     if (cacheHud.vida !== pct) {
       cacheHud.vida = pct;
@@ -267,16 +276,17 @@
     if (TTT.Telas.atual === 'jogo' && !jogo.pausado) {
       if (e.key === 'Escape') { e.preventDefault(); pausar(); return; }
       if (e.key === 'Tab') { e.preventDefault(); jogo.autocompletar(); return; }
+      if (e.key === 'Shift') { jogo.desfocar(); return; } // troca de alvo mantendo o progresso
+      if (e.key === ' ') { e.preventDefault(); jogo.usarEscudo(); return; } // libera a onda do escudo
       // com o campo do teclado virtual focado, letras e Backspace chegam pelo evento "input"
       if (e.target === entrada) return;
       if (e.key === 'Backspace') { e.preventDefault(); jogo.apagar(e.ctrlKey || e.altKey || e.metaKey); return; }
       if (TTT.DEBUG && ['1', '2', '3'].includes(e.key)) {
-        TTT.Bonus.ativar(jogo, ['autocompletar', 'escudo', 'semAcentos'][Number(e.key) - 1]);
+        TTT.Bonus.ativar(jogo, ['autocompletar', 'escudo', 'vida'][Number(e.key) - 1]);
         return;
       }
       if (e.ctrlKey || e.metaKey) return;
       // e.key === 'Dead' (acento morto) é ignorado; a letra acentuada vem no próximo evento
-      if (e.key === ' ') { e.preventDefault(); return; } // palavras não têm espaço (por enquanto)
       if (e.key.length === 1) {
         e.preventDefault();
         jogo.teclar(e.key);

@@ -6,15 +6,21 @@
 // =========================================================
 (() => {
   const C = TTT.CORES;
+  const COR_BONUS = {
+    autocompletar: C.rosa,
+    escudo: C.azulClaro,
+    vida: C.verde,
+  };
 
   class Alvo {
-    constructor({ texto, x, y, vel, tipo = 'palavra', atirador = false }) {
+    constructor({ texto, x, y, vel, tipo = 'palavra', atirador = false, bonus = null }) {
       this.texto = texto;
       this.x = x;
       this.y = y;
       this.vel = vel;
       this.tipo = tipo;          // 'palavra' | 'projetil'
       this.atirador = atirador;  // palavras atiradoras disparam projéteis
+      this.bonus = bonus;        // id do bônus pago se completar sem erros (null = comum)
       this.digitado = 0;
       this.vivo = true;
       this.morrendo = false;     // completo, esperando o último tiro chegar
@@ -27,7 +33,8 @@
     get completo() { return this.digitado >= this.texto.length; }
     get cor() {
       if (this.tipo === 'projetil') return C.vermelho;
-      return this.atirador ? C.rosa : C.branco;
+      if (this.bonus) return COR_BONUS[this.bonus] || C.branco;
+      return this.atirador ? C.vermelho : C.branco;
     }
 
     // cada letra acertada empurra o alvo um pouco para trás (feedback)
